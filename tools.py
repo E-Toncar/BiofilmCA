@@ -41,13 +41,9 @@ class Tools:
                 x -= (random.random() * 0.2)  # postupně snižuje pravděpodobnost r;stu biofilmu směrem nahoru
 
         for i in range(1, 5):
-            for j in range(1, Constants.cols):
-                n = 0
+            for j in range(1, Constants.cols -1):
                 neighbors = Tools.search_neighbors(grid, i, j)
-                for neighbor in neighbors:
-                    if neighbor == Constants.unprotected or neighbor == Constants.protected:
-                        n += 1
-                if n > 5:
+                if neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected) > 5:
                     grid[i][j] = Constants.protected
 
         return grid
@@ -62,7 +58,7 @@ class Tools:
 
                 n = 0 # počet živých sousedů
                 d = 0 # počet mrtvých sousedů / produkují eDNA a típ pádem zvyšují ochranu sousedních buňek.
-                p = 0 # počáteční pravděpodobnost, že buňka podlehne antibiotiiku a zemře. (Snižuje se s počtem mrtvých sousedů a pokud je buňka protected.)
+                p = 0.7 # počáteční pravděpodobnost, že buňka podlehne antibiotiiku a zemře. (Snižuje se s počtem mrtvých sousedů a pokud je buňka protected.)
 
                 neighbors = Tools.search_neighbors(grid, i, j)
 
@@ -70,10 +66,15 @@ class Tools:
                     # pokud je buňka prázdná, zkontroluje se počet živých sousedů. Pokud má aspoň 3, tak se stane živou.
                     if (neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected)) > 3:
                         new_grid[i][j] = Constants.unprotected
-                elif grid[i][j] == Constants.unprotected:
-                    continue
-                elif grid[i][j] == Constants.protected:
-                    continue
+                elif grid[i][j] == Constants.unprotected or grid[i][j] == Constants.protected:
+                    if grid[i][j] == Constants.protected:
+                        p -= 0.3 # pokud je buňka chráněná, tak se sníží pravděpodobnost, že zemře.
+                    d = 8 - (neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected) + neighbors.count(Constants.empty)) # počet mrtvých sousedů
+                    p -= d * 0.1 # čím více mrtvých sousedů, tím menší pravděpodobnost, že buňka zemře.
+                    if p < 0.1:
+                        p = 0.1 # minimální pravděpodobnost, že buňka zemře.
+                    if random.random() < p:
+                        new_grid[i][j] = Constants.dead
                 elif Constants.dead <= grid[i][j] < Constants.dead_end:
                     new_grid[i][j] += 1
                 elif grid[i][j] == Constants.dead_end:
@@ -81,4 +82,13 @@ class Tools:
                 else:
                     print(f"Unexpected cell state: {grid[i][j]} at ({i}, {j})")
                     break
+
+        for i in range(1, Constants.rows - 1):
+            for j in range(1, Constants.cols - 1):
+                neighbors = Tools.search_neighbors(new_grid, i, j)
+                if neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected) > 5:
+                    new_grid[i][j] = Constants.protected
+
+
+
         return new_grid
