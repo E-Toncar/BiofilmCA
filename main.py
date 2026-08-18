@@ -6,6 +6,7 @@ from constants import Constants
 
 def main():
     grid = Tools.create_grid()
+    grid = Tools.seed_grid(grid)
     #print(f"Grid size: {Constants.rows} x {Constants.cols}")
     
 

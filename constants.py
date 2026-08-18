@@ -12,3 +12,4 @@ class Constants:
     unprotected = 1
     protected = 2
     dead = 3
+    dead_end = 8
