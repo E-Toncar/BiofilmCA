@@ -30,21 +30,20 @@ class Tools:
         Inicializuje mřížku s počátečními hodnotami. Náhodně vytvoří živé buňky ve spodu mřížky (simulace růstu biofilmu od povrchu vzhůru.)
         Následně prochází mřížku a pokud má buňka více než 5 živých sousedů, stává se chráněnou buňkou.
         """
-        x = 0.9
-        n = 0
+        p = 0.9
 
-        for i in range(0, 5):
+        for i in range(0, 18):
             for j in range(0, Constants.cols):
-                if random.random() < x:
+                if random.random() < p:
                     grid[Constants.rows - 1 - i][j] = Constants.unprotected
+            p -= 0.05 # postupně snižuje pravděpodobnost r;stu biofilmu směrem nahoru
 
-                x -= (random.random() * 0.2)  # postupně snižuje pravděpodobnost r;stu biofilmu směrem nahoru
-
-        for i in range(1, 5):
+        for i in range(1, 18):
             for j in range(1, Constants.cols -1):
-                neighbors = Tools.search_neighbors(grid, i, j)
-                if neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected) > 5:
-                    grid[i][j] = Constants.protected
+                if grid[Constants.rows - 1 - i][j] == Constants.unprotected:
+                    neighbors = Tools.search_neighbors(grid, Constants.rows - 1 - i, j)
+                    if neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected) > Constants.min_protected_neighbors:
+                        grid[Constants.rows - 1 - i][j] = Constants.protected
 
         return grid
 
@@ -56,15 +55,14 @@ class Tools:
         for i in range(1, Constants.rows - 1):
             for j in range(1, Constants.cols - 1):
 
-                n = 0 # počet živých sousedů
                 d = 0 # počet mrtvých sousedů / produkují eDNA a típ pádem zvyšují ochranu sousedních buňek.
-                p = 0.7 # počáteční pravděpodobnost, že buňka podlehne antibiotiiku a zemře. (Snižuje se s počtem mrtvých sousedů a pokud je buňka protected.)
+                p = Constants.base_death_probability # počáteční pravděpodobnost, že buňka podlehne antibiotiiku a zemře. (Snižuje se s počtem mrtvých sousedů a pokud je buňka protected.)
 
                 neighbors = Tools.search_neighbors(grid, i, j)
 
                 if grid[i][j] == Constants.empty:
                     # pokud je buňka prázdná, zkontroluje se počet živých sousedů. Pokud má aspoň 3, tak se stane živou.
-                    if (neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected)) > 3:
+                    if (neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected)) > Constants.min_neighbors_to_live:
                         new_grid[i][j] = Constants.unprotected
                 elif grid[i][j] == Constants.unprotected or grid[i][j] == Constants.protected:
                     if grid[i][j] == Constants.protected:
@@ -85,10 +83,10 @@ class Tools:
 
         for i in range(1, Constants.rows - 1):
             for j in range(1, Constants.cols - 1):
-                neighbors = Tools.search_neighbors(new_grid, i, j)
-                if neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected) > 5:
-                    new_grid[i][j] = Constants.protected
-
+                if new_grid[i][j] == Constants.unprotected:
+                    neighbors = Tools.search_neighbors(new_grid, i, j)
+                    if neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected) > Constants.min_protected_neighbors:
+                        new_grid[i][j] = Constants.protected
 
 
         return new_grid
