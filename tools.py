@@ -66,11 +66,11 @@ class Tools:
                         new_grid[i][j] = Constants.unprotected
                 elif grid[i][j] == Constants.unprotected or grid[i][j] == Constants.protected:
                     if grid[i][j] == Constants.protected:
-                        p -= 0.3 # pokud je buňka chráněná, tak se sníží pravděpodobnost, že zemře.
+                        p -= Constants.cluster_protection # pokud je buňka chráněná, tak se sníží pravděpodobnost, že zemře.
                     d = 8 - (neighbors.count(Constants.unprotected) + neighbors.count(Constants.protected) + neighbors.count(Constants.empty)) # počet mrtvých sousedů
-                    p -= d * 0.1 # čím více mrtvých sousedů, tím menší pravděpodobnost, že buňka zemře.
-                    if p < 0.1:
-                        p = 0.1 # minimální pravděpodobnost, že buňka zemře.
+                    p -= d * Constants.dead_cell_protection # čím více mrtvých sousedů, tím menší pravděpodobnost, že buňka zemře.
+                    if p < 0:
+                        p = 0# minimální pravděpodobnost, že buňka zemře.
                     if random.random() < p:
                         new_grid[i][j] = Constants.dead
                 elif Constants.dead <= grid[i][j] < Constants.dead_end:

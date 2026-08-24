@@ -18,3 +18,6 @@ class Constants:
     min_protected_neighbors = 5
     min_neighbors_to_live = 2
     base_death_probability = 0.6
+
+    dead_cell_protection = 0.05
+    cluster_protection = 0.4
